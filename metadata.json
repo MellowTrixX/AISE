@@ -1,0 +1,5 @@
+{
+  "name": "AI Screenshot Extractor",
+  "description": "A tool to extract text or generate professional image prompts from screenshots using AI. Users can paste screenshots directly from the clipboard and choose the desired extraction type.",
+  "requestFramePermissions": []
+}
