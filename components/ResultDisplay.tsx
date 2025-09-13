@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ExtractionMode } from '../types';
 import { CopyIcon, CheckIcon, ErrorIcon, LoadingSpinner } from './Icons';
+import MarkdownRenderer from './MarkdownRenderer';
 
 interface ResultDisplayProps {
   isLoading: boolean;
@@ -63,7 +64,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ isLoading, result, error,
             {isJson ? (
                  <pre className="text-sm whitespace-pre-wrap break-words text-light">{result}</pre>
             ) : (
-                <p className="text-base whitespace-pre-wrap break-words text-light">{result}</p>
+                <MarkdownRenderer markdown={result} />
             )}
         </div>
     </div>

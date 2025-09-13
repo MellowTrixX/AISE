@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 
 if (!process.env.API_KEY) {
@@ -14,9 +13,13 @@ const imagePart = (base64Data: string) => ({
   },
 });
 
-export const extractTextFromImage = async (base64Data: string): Promise<string> => {
+export const extractRawTextFromImage = async (base64Data: string): Promise<string> => {
   const textPart = {
-    text: "Extrahiere den gesamten Text aus diesem Bild. Gib nur den extrahierten Text ohne zusätzliche Erklärungen oder Formatierungen zurück.",
+    text: `Führe eine präzise OCR (Optical Character Recognition) auf dem Bild durch.
+    Extrahiere JEDEN Text, den du siehst, egal wie klein.
+    Gib den gesamten extrahierten Text als eine einfache, unsortierte Liste zurück.
+    Jeder erkannte Textblock oder jedes Wort sollte in einer neuen Zeile stehen.
+    Formatiere das Ergebnis NICHT. Strukturiere es NICHT. Erfinde NICHTS. Gib nur den rohen Text zurück.`,
   };
 
   const response = await ai.models.generateContent({
@@ -24,8 +27,31 @@ export const extractTextFromImage = async (base64Data: string): Promise<string> 
     contents: { parts: [imagePart(base64Data), textPart] },
   });
 
+  return response.text.trim();
+};
+
+export const structureTextFromText = async (rawText: string): Promise<string> => {
+  const prompt = `Du bist ein Experte für die Analyse von Zusammenhängen.
+    Gegeben ist die folgende unsortierte Liste von Begriffen, die aus einem Diagramm stammen:
+    ---
+    ${rawText}
+    ---
+    Deine Aufgabe ist es, diese Begriffe in eine logische, hierarchische Struktur zu bringen.
+    - Analysiere die Begriffe und erkenne Eltern-Kind-Beziehungen.
+    - Formatiere das Ergebnis als eine einzelne, verschachtelte Markdown-Liste.
+    - Jeder Listeneintrag muss mit einem Bindestrich (-) beginnen.
+    - Verwende Einrückungen (2 Leerzeichen pro Ebene), um die Hierarchie darzustellen.
+    - Gib NUR die Markdown-Liste aus, sonst nichts. Kein einleitender Text, keine Zusammenfassung.`;
+
+
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+  });
+
   return response.text;
 };
+
 
 export const generatePromptFromImage = async (base64Data: string): Promise<string> => {
   const textPart = {
